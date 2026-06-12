@@ -1,0 +1,224 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>鴻禧阿舅 ContentGPT｜內容生產台</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+  :root{--deep:#15375B;--deep-2:#1E4D7B;--teal:#1B7A93;--teal-soft:#2C8FA8;--yellow:#F5C518;
+    --paper:#F4F7FA;--card:#FFFFFF;--ink:#10283F;--ink-soft:#5A6B7B;--line:#E2E8EE;--coral:#D9534F;
+    --shadow:0 1px 2px rgba(16,40,63,.06),0 8px 24px rgba(16,40,63,.07);}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--paper);color:var(--ink);
+    font-family:"Noto Sans TC",-apple-system,"PingFang TC","Microsoft JhengHei",sans-serif;line-height:1.6}
+  .wrap{max-width:1100px;margin:0 auto;padding:0 20px 64px}
+  header{background:linear-gradient(135deg,var(--deep),var(--deep-2));color:#fff;padding:20px 0;border-bottom:4px solid var(--yellow)}
+  .bar{max-width:1100px;margin:0 auto;padding:0 20px;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+  .titles h1{margin:0;font-size:20px;font-weight:900}
+  .titles p{margin:2px 0 0;font-size:12.5px;color:#AFC8DD}
+  .pos{margin-left:auto;font-size:12px;color:#cfe0ee;display:flex;gap:8px;flex-wrap:wrap}
+  .pos span{background:rgba(255,255,255,.12);padding:3px 10px;border-radius:20px}
+
+  .step{margin:24px 0 10px;font-size:13px;font-weight:700;color:var(--deep);display:flex;align-items:center;gap:8px}
+  .step b{background:var(--yellow);color:#3a2f00;width:22px;height:22px;border-radius:50%;display:grid;place-items:center;font-size:12px}
+
+  .cmds{display:flex;gap:8px;flex-wrap:wrap}
+  .cmd{appearance:none;border:1px solid var(--line);background:#fff;cursor:pointer;font:inherit;font-size:13.5px;
+    color:var(--ink);padding:9px 16px;border-radius:22px;transition:.12s;font-weight:500}
+  .cmd:hover{border-color:var(--teal-soft)}
+  .cmd.on{background:var(--deep);color:#fff;border-color:var(--deep);font-weight:700}
+
+  .inrow{margin-top:10px;display:flex;gap:10px;flex-wrap:wrap}
+  #topicInput{flex:1;min-width:260px;border:1px solid var(--line);border-radius:12px;padding:12px 14px;font:inherit;font-size:14px}
+  #topicInput:focus{outline:2px solid var(--teal-soft);outline-offset:-2px}
+  .go{appearance:none;border:none;cursor:pointer;font:inherit;font-weight:900;font-size:15px;background:var(--yellow);
+    color:#3a2f00;padding:12px 26px;border-radius:12px;box-shadow:0 6px 16px rgba(245,197,24,.4);transition:transform .08s}
+  .go:hover{transform:translateY(-1px)}.go:disabled{opacity:.55;transform:none;cursor:default}
+
+  .bank{margin-top:12px;background:var(--card);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);overflow:hidden}
+  .tabs{display:flex;border-bottom:1px solid var(--line);overflow-x:auto}
+  .tab{appearance:none;border:none;background:none;cursor:pointer;font:inherit;font-size:13px;padding:11px 14px;color:var(--ink-soft);white-space:nowrap;border-bottom:3px solid transparent}
+  .tab.on{color:var(--deep);font-weight:700;border-bottom-color:var(--yellow)}
+  .list{max-height:230px;overflow:auto;padding:8px}
+  .topic{display:flex;gap:10px;align-items:baseline;padding:8px 10px;border-radius:9px;cursor:pointer;font-size:13.5px}
+  .topic:hover{background:var(--paper)}
+  .topic.on{background:#E8F4F8;outline:1px solid #BFE0EA}
+  .code{font-size:11px;font-weight:700;color:var(--teal);font-family:Consolas,monospace;flex:0 0 auto}
+
+  .out{margin-top:22px;display:grid;gap:16px}
+  .rc{background:var(--card);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);overflow:hidden}
+  .rc-head{padding:11px 16px;background:var(--teal);color:#fff;font-size:13.5px;font-weight:700;display:flex;align-items:center;gap:8px}
+  .rc-body{padding:16px}
+  .rc-body .md{font-size:14px;white-space:normal}
+  .md p{margin:7px 0}.md h4{margin:12px 0 6px;color:var(--deep);font-size:14px}
+  .md ul{margin:6px 0;padding-left:20px}.md li{margin:3px 0}.md strong{color:var(--deep)}
+  .copy{margin:12px 16px 16px;appearance:none;border:1px solid var(--line);background:#fff;cursor:pointer;font:inherit;font-size:12px;color:var(--teal);padding:6px 14px;border-radius:8px}
+  .copy:hover{background:var(--teal);color:#fff;border-color:var(--teal)}
+  .loading{display:flex;align-items:center;gap:10px;color:var(--teal);font-size:13.5px}
+  .spin{width:15px;height:15px;border:2px solid var(--line);border-top-color:var(--teal);border-radius:50%;animation:sp .7s linear infinite}
+  @keyframes sp{to{transform:rotate(360deg)}}
+  .err{color:var(--coral);font-size:13px;background:#FDF0EF;border:1px solid #F3CDCB;padding:9px 12px;border-radius:9px}
+  .placeholder{color:var(--ink-soft);font-size:13.5px;text-align:center;padding:30px 0}
+  footer{margin-top:30px;text-align:center;color:var(--ink-soft);font-size:12px}
+  @media(max-width:640px){.pos{display:none}}
+</style>
+</head>
+<body>
+<header><div class="bar">
+  <svg width="36" height="36" viewBox="0 0 48 48" fill="none">
+    <ellipse cx="24" cy="40" rx="11" ry="3" fill="#0d2740"/>
+    <path d="M16 26h16l-1.5 12a2 2 0 0 1-2 1.8h-9a2 2 0 0 1-2-1.8L16 26z" fill="#FBF4E4"/>
+    <path d="M24 7c10 0 16 7 16 14 0 3-2 5-5 5H13c-3 0-5-2-5-5C8 14 14 7 24 7z" fill="#F5C518"/>
+    <circle cx="18" cy="17" r="2.4" fill="#fff"/><circle cx="29" cy="14" r="3" fill="#fff"/>
+    <circle cx="31" cy="22" r="2" fill="#fff"/><circle cx="21" cy="32" r="1.3" fill="#15375B"/>
+    <circle cx="27" cy="32" r="1.3" fill="#15375B"/><path d="M22.5 35.5q1.5 1.2 3 0" stroke="#15375B" stroke-width="1.2" stroke-linecap="round" fill="none"/>
+  </svg>
+  <div class="titles"><h1>鴻禧阿舅 ContentGPT｜內容生產台</h1><p>選題 → AI 生成 → 團隊生產</p></div>
+  <div class="pos"><span>最懂羅東</span><span>最接地氣</span><span>最有行動力</span></div>
+</div></header>
+
+<div class="wrap">
+  <div class="step"><b>1</b> 選指令</div>
+  <div class="cmds" id="cmds"></div>
+
+  <div class="step"><b>2</b> <span id="step2label">選題目（CP001–CP100），或直接輸入主題</span></div>
+  <div class="inrow">
+    <input id="topicInput" placeholder="點下方題目，或自行輸入主題">
+    <button class="go" id="goBtn" onclick="run()">生成</button>
+  </div>
+
+  <div class="bank">
+    <div class="tabs" id="tabs"></div>
+    <div class="list" id="list"></div>
+  </div>
+
+  <div class="out" id="out"><div class="placeholder">選一個指令與題目，按「生成」即可產出可發布內容。</div></div>
+
+  <footer>產出為草稿 · 內容避免官腔、空泛與攻擊他人</footer>
+</div>
+
+<script>
+/* ===== 題庫 CP001–CP100 ===== */
+const BANK=[
+ ["A","阿舅人設",[["CP001","為什麼大家叫我阿舅"],["CP002","我最喜歡的羅東角落"],["CP003","小時候的羅東"],["CP004","我人生第一份工作"],["CP005","創業最辛苦的一天"],["CP006","最感謝的一位長輩"],["CP007","跑行程最感動的一刻"],["CP008","我每天最常被問的問題"],["CP009","羅東教會我的事"],["CP010","為什麼一直留在羅東"],["CP011","我眼中的羅東年輕人"],["CP012","我眼中的羅東長輩"],["CP013","最難忘的一次服務"],["CP014","最想解決的一件事"],["CP015","羅東最讓我驕傲的地方"],["CP016","最有成就感的一天"],["CP017","最想感謝的人"],["CP018","我最常去的地方"],["CP019","我的早餐地圖"],["CP020","我的夜市地圖"],["CP021","一天的阿舅"],["CP022","如果不是做服務工作"],["CP023","羅東未來的想像"],["CP024","最常被誤會的事情"],["CP025","給十年後羅東的一封信"]]],
+ ["B","羅東故事",[["CP026","羅東夜市最讓你懷念什麼"],["CP027","羅東火車站的回憶"],["CP028","羅東林場的故事"],["CP029","老羅東人才知道的事"],["CP030","羅東人的共同童年"],["CP031","羅東最美的時間"],["CP032","羅東雨天的樣子"],["CP033","羅東最有人情味的地方"],["CP034","羅東哪條路變化最大"],["CP035","羅東最值得驕傲的是什麼"],["CP036","市場的一天"],["CP037","夜市的一天"],["CP038","運動公園的一天"],["CP039","羅東老照片故事"],["CP040","羅東美食地圖"],["CP041","羅東早餐地圖"],["CP042","羅東人的生活節奏"],["CP043","羅東最適合散步的地方"],["CP044","羅東人的熱情"],["CP045","羅東以前跟現在最大的不同"],["CP046","羅東最需要被保存的是什麼"],["CP047","羅東商圈的變化"],["CP048","羅東人最愛去哪裡"],["CP049","如果朋友來羅東一天"],["CP050","我希望留下的羅東記憶"]]],
+ ["C","民眾心聲",[["CP051","長輩最常跟阿舅說什麼"],["CP052","家長最擔心什麼"],["CP053","青年最擔心什麼"],["CP054","店家最希望改善什麼"],["CP055","攤商最希望改善什麼"],["CP056","羅東最難停車的地方"],["CP057","最危險的路口"],["CP058","最需要改善的人行道"],["CP059","長照家庭最辛苦的是什麼"],["CP060","年輕人為什麼離開羅東"],["CP061","年輕人為什麼回到羅東"],["CP062","接送孩子最大的困擾"],["CP063","公園還缺什麼"],["CP064","親子空間夠不夠"],["CP065","夜市環境問題"],["CP066","市場環境問題"],["CP067","長輩最需要什麼"],["CP068","青年最期待什麼"],["CP069","羅東最需要改善什麼"],["CP070","羅東最有潛力的是什麼"],["CP071","羅東最需要增加的公共空間"],["CP072","羅東交通最大的問題"],["CP073","羅東最需要被傾聽的聲音"],["CP074","羅東人的共同期待"],["CP075","你希望未來羅東變成什麼樣子"]]],
+ ["D","鴻禧菇IP",[["CP076","鴻禧菇巡邏夜市"],["CP077","鴻禧菇巡邏市場"],["CP078","鴻禧菇巡邏運動公園"],["CP079","鴻禧菇問阿舅"],["CP080","鴻禧菇推薦早餐"],["CP081","鴻禧菇推薦美食"],["CP082","鴻禧菇推薦散步路線"],["CP083","鴻禧菇推薦約會地圖"],["CP084","鴻禧菇學台語"],["CP085","鴻禧菇冷知識"],["CP086","鴻禧菇小記者"],["CP087","鴻禧菇街訪"],["CP088","有鴻禧尚歡喜"],["CP089","買香菇結果買鴻禧菇"],["CP090","鴻禧菇今天發現什麼"],["CP091","鴻禧菇觀察日記"],["CP092","如果鴻禧菇是鎮長"],["CP093","鴻禧菇問年輕人"],["CP094","鴻禧菇問長輩"],["CP095","鴻禧菇問家長"],["CP096","羅東未來由鴻禧菇報告"],["CP097","鴻禧菇的一天"],["CP098","鴻禧菇的煩惱"],["CP099","鴻禧菇的願望"],["CP100","鴻禧菇眼中的羅東"]]],
+];
+
+/* ===== ContentGPT 大腦（master prompt） ===== */
+const MASTER=`你是「陳鴻禧 ContentGPT」，陳鴻禧羅東鎮長選戰的內容總編輯。
+品牌定位：最懂羅東、最接地氣、最有行動力。
+人設「鴻禧阿舅」：親切、有溫度、願意傾聽、重視地方聲音、認真做事、沒有官腔。
+語氣必須像真人、像阿舅親自發文、使用生活語言、有羅東在地感。
+嚴格避免：官腔、公文語氣、過度空泛、長篇政策說教、攻擊他人。
+鴻禧菇是吉祥物／羅東觀察員／小記者／情報員，活潑可愛親民、但不幼稚化。
+選戰目的：知名度、好感度、信任感、支持度。
+輸出原則：只給可直接發布的內容，不要前言、不要額外說明或理論。台灣繁體中文。`;
+
+/* ===== 指令 ===== */
+const CMDS={
+ gen:{label:"#生成 完整內容包"},
+ reels:{label:"#短影音"},
+ card:{label:"#圖卡"},
+ street:{label:"#街訪"},
+ topic:{label:"#選題"},
+ week:{label:"#本週規劃"},
+};
+let CUR="gen";
+
+/* ===== 介面建構 ===== */
+const cmdsEl=document.getElementById("cmds");
+Object.entries(CMDS).forEach(([k,v])=>{
+  const b=document.createElement("button");b.className="cmd"+(k==CUR?" on":"");b.textContent=v.label;
+  b.onclick=()=>{CUR=k;[...cmdsEl.children].forEach(c=>c.classList.remove("on"));b.classList.add("on");updateLabels();};
+  cmdsEl.appendChild(b);
+});
+function updateLabels(){
+  const ti=document.getElementById("topicInput"),l=document.getElementById("step2label"),go=document.getElementById("goBtn");
+  if(CUR=="topic"){l.textContent="輸入情境（例：今天市場阿姨反映停車問題）";ti.placeholder="輸入情境，AI 幫你推薦選題";go.textContent="推薦選題";}
+  else if(CUR=="week"){l.textContent="輸入本週主題（例：青年）";ti.placeholder="輸入本週主題";go.textContent="排一週";}
+  else{l.textContent="選題目（CP001–CP100），或直接輸入主題";ti.placeholder="點下方題目，或自行輸入主題";go.textContent="生成";}
+}
+
+let TAB=0;
+const tabsEl=document.getElementById("tabs"),listEl=document.getElementById("list");
+BANK.forEach((g,i)=>{const b=document.createElement("button");b.className="tab"+(i==0?" on":"");b.textContent=g[0]+"｜"+g[1];
+  b.onclick=()=>{TAB=i;[...tabsEl.children].forEach(c=>c.classList.remove("on"));b.classList.add("on");renderList();};tabsEl.appendChild(b);});
+function renderList(){
+  listEl.innerHTML="";
+  BANK[TAB][2].forEach(([code,title])=>{
+    const d=document.createElement("div");d.className="topic";
+    d.innerHTML='<span class="code">'+code+'</span><span>'+title+'</span>';
+    d.onclick=()=>{document.getElementById("topicInput").value=code+" "+title;
+      [...listEl.children].forEach(c=>c.classList.remove("on"));d.classList.add("on");};
+    listEl.appendChild(d);
+  });
+}
+renderList();updateLabels();
+
+/* ===== 呼叫 Claude ===== */
+async function callClaude(prompt){
+  const res=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:1000,messages:[{role:"user",content:MASTER+"\n\n"+prompt}]})});
+  if(!res.ok) throw new Error("API "+res.status);
+  const d=await res.json();
+  return d.content.filter(b=>b.type==="text").map(b=>b.text).join("\n").trim();
+}
+function esc(s){return (s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");}
+function md(t){const ls=esc(t).split("\n");let h="",ul=false;const f=()=>{if(ul){h+="</ul>";ul=false;}};
+  for(let ln of ls){ln=ln.replace(/\*\*(.+?)\*\*/g,"<strong>$1</strong>");
+    if(/^#{1,4}\s/.test(ln)){f();h+="<h4>"+ln.replace(/^#{1,4}\s/,"")+"</h4>";}
+    else if(/^[【\[].+[】\]]/.test(ln)){f();h+="<h4>"+ln+"</h4>";}
+    else if(/^\s*[-*・•]\s/.test(ln)){if(!ul){h+="<ul>";ul=true;}h+="<li>"+ln.replace(/^\s*[-*・•]\s/,"")+"</li>";}
+    else if(/^\s*\d+[.、)]\s/.test(ln)){if(!ul){h+="<ul>";ul=true;}h+="<li>"+ln.replace(/^\s*\d+[.、)]\s/,"")+"</li>";}
+    else if(ln.trim()==""){f();}else{f();h+="<p>"+ln+"</p>";}}
+  f();return h;}
+
+/* 結果卡 */
+function card(id,title){return '<section class="rc"><div class="rc-head">'+title+'</div><div class="rc-body" id="'+id+'"><div class="loading"><span class="spin"></span>生成中…</div></div></section>';}
+function fill(id,text){const el=document.getElementById(id);
+  el.innerHTML='<div class="md">'+md(text)+'</div>';
+  const btn=document.createElement("button");btn.className="copy";btn.textContent="複製";
+  btn.onclick=()=>{navigator.clipboard.writeText(text).then(()=>{btn.textContent="已複製 ✓";setTimeout(()=>btn.textContent="複製",1400);});};
+  el.parentNode.appendChild(btn);}
+function failCard(id,msg){document.getElementById(id).innerHTML='<div class="err">生成失敗：'+esc(msg)+'，請再按一次。</div>';}
+
+/* ===== 主流程 ===== */
+const GEN_PARTS=[
+ ["g_fb","📘 FB 貼文", T=>`為主題「${T}」寫一則臉書貼文：像阿舅親自發文、生活語言、有羅東在地感，約 150–250 字，結尾自然帶出與鄉親的連結或一個小行動。`],
+ ["g_ig","📷 IG 版文案", T=>`為主題「${T}」寫一則 IG 文案：較短、適度分行、結尾附 4–6 個在地 hashtag。`],
+ ["g_reels","🎬 Reels 腳本（30 秒）", T=>`為主題「${T}」寫 30 秒 Reels 腳本，分三段：【開場鉤子】【中段內容】【結尾互動】，口語可拍攝。`],
+ ["g_card","🪧 圖卡文案", T=>`為主題「${T}」產出圖卡文案：主標題（一句吸睛）、副標題（一句補充）、三點重點（每點一句）。`],
+ ["g_story","💬 限動互動題", T=>`為主題「${T}」設計 1–2 則限時動態互動（投票／問答／滑桿擇一），給題目與選項。`],
+];
+
+async function run(){
+  const T=document.getElementById("topicInput").value.trim();
+  const out=document.getElementById("out"),go=document.getElementById("goBtn");
+  if(!T){out.innerHTML='<div class="placeholder">請先選題目或輸入主題。</div>';return;}
+  go.disabled=true;
+
+  if(CUR=="gen"){
+    out.innerHTML=GEN_PARTS.map(p=>card(p[0],p[1])).join("");
+    for(const [id,,builder] of GEN_PARTS){
+      try{ fill(id, await callClaude(builder(T))); }catch(e){ failCard(id,e.message); }
+    }
+  } else {
+    const single={
+      reels:["🎬 Reels 腳本（30 秒）",`為主題「${T}」寫 30 秒 Reels 腳本，分三段：【開場鉤子】【中段內容】【結尾互動】，口語可拍攝。`],
+      card:["🪧 圖卡文案",`為主題「${T}」產出圖卡文案：主標題、副標題、三點重點（每點一句）。`],
+      street:["🎤 街訪企劃",`為主題「${T}」設計街訪：5 個街訪問題（口語、好回答、能引出真實心聲）、拍攝建議、剪輯建議，分段標題列出。`],
+      topic:["🧭 選題推薦",`根據情境「${T}」，推薦 3 個最適合的選題。每個附：推薦題目、原因、適合平台、適合族群；若能對應題庫 CP 編號請標註。`],
+      week:["🗓️ 本週內容規劃",`以本週主題「${T}」規劃週一到週五的內容，每天標示：內容類型、目標族群、選戰目的，精簡可執行。`],
+    }[CUR];
+    out.innerHTML=card("single",single[0]);
+    try{ fill("single", await callClaude(single[1])); }catch(e){ failCard("single",e.message); }
+  }
+  go.disabled=false;
+}
+</script>
+</body>
+</html>
